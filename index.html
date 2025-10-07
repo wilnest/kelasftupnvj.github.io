@@ -66,17 +66,22 @@
   <div id="booking" class="hidden p-4 sm:p-6">
     <div class="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-6">
       <h2 class="text-2xl font-bold text-center mb-4">Permohonan Booking Kelas</h2>
-      <form class="space-y-4">
-        <input type="text" placeholder="Nama Mahasiswa" class="w-full border border-gray-300 rounded-lg p-3">
-        <input type="text" placeholder="NIM" class="w-full border border-gray-300 rounded-lg p-3">
-        <select class="w-full border border-gray-300 rounded-lg p-3">
-          <option>Pilih Ruang</option>
+      <form id="bookingForm" class="space-y-4">
+        <input type="text" id="nama" placeholder="Nama Mahasiswa" class="w-full border border-gray-300 rounded-lg p-3" required>
+        <input type="text" id="nim" placeholder="NIM" class="w-full border border-gray-300 rounded-lg p-3" required>
+        
+        <select id="bookingRuang" class="w-full border border-gray-300 rounded-lg p-3" required>
+          <option value="">Pilih Ruang</option>
           <option>301</option><option>302</option><option>303</option><option>304</option>
           <option>305</option><option>306</option><option>401</option><option>402</option>
           <option>403</option><option>404</option><option>405</option><option>406</option>
         </select>
-        <select id="bookingWaktu" class="w-full border border-gray-300 rounded-lg p-3"></select>
-        <button type="button" class="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition">
+
+        <input type="date" id="bookingTanggal" class="w-full border border-gray-300 rounded-lg p-3" required>
+
+        <select id="bookingWaktu" class="w-full border border-gray-300 rounded-lg p-3" required></select>
+
+        <button type="button" onclick="ajukanBooking()" class="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition">
           Ajukan Permohonan
         </button>
       </form>
@@ -182,14 +187,34 @@
       kelasStatus[tanggal][waktu][kelas] = status;
 
       localStorage.setItem("kelasStatus", JSON.stringify(kelasStatus));
+      renderKelas();
+      alert(`Status ruang ${kelas} pada ${tanggal} jam ${waktu} diubah menjadi ${status}.`);
+    }
 
-      const mainTanggal = document.getElementById('tanggal').value;
-      const mainWaktu = document.getElementById('jam').value;
-      if (mainTanggal === tanggal && mainWaktu === waktu) {
-        renderKelas();
+    // 🟢 Fitur baru: Ajukan Booking otomatis ubah status menjadi "terpakai"
+    function ajukanBooking() {
+      const nama = document.getElementById('nama').value.trim();
+      const nim = document.getElementById('nim').value.trim();
+      const ruang = document.getElementById('bookingRuang').value;
+      const tanggal = document.getElementById('bookingTanggal').value;
+      const waktu = document.getElementById('bookingWaktu').value;
+
+      if (!nama || !nim || !ruang || !tanggal || !waktu) {
+        alert("Mohon lengkapi semua data sebelum mengajukan!");
+        return;
       }
 
-      alert(`Status ruang ${kelas} pada ${tanggal} jam ${waktu} diubah menjadi ${status}.`);
+      if (!kelasStatus[tanggal]) kelasStatus[tanggal] = {};
+      if (!kelasStatus[tanggal][waktu]) kelasStatus[tanggal][waktu] = {};
+      kelasStatus[tanggal][waktu][ruang] = "terpakai";
+
+      localStorage.setItem("kelasStatus", JSON.stringify(kelasStatus));
+      alert(`Permohonan booking ruang ${ruang} berhasil!\nStatus ruang kini: TERPAKAI.`);
+      
+      // Reset form dan kembali ke menu utama
+      document.getElementById("bookingForm").reset();
+      showTab("jadwal");
+      renderKelas();
     }
 
     function resetData() {
