@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Ketersediaan Kelas FT UPNVJ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .room-available {
+      background: linear-gradient(135deg, #10b981, #059669);
+      transition: all 0.3s ease;
+    }
+    .room-available:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+    .room-occupied {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      transition: all 0.3s ease;
+    }
+    .room-occupied:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-yellow-400 text-black py-4 shadow-md flex flex-col sm:flex-row items-center justify-center relative text-center sm:text-left">
+    <img src="LOGO UPNVJ.png" alt="Logo UPNVJ" class="sm:absolute sm:left-6 w-14 h-14 sm:w-16 sm:h-16 mb-2 sm:mb-0">
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold px-4">Jadwal Ketersediaan Kelas FT UPNVJ</h1>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="bg-gray-800 text-white py-3 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-12 text-center">
+    <button onclick="showTab('jadwal')" class="hover:underline px-3 py-1">Menu Utama</button>
+    <button onclick="showTab('booking')" class="hover:underline px-3 py-1">Booking Kelas</button>
+    <button onclick="showTab('admin')" class="hover:underline px-3 py-1">Ganti Jadwal Kelas</button>
+  </nav>
+
+  <!-- Menu Utama -->
+  <div id="jadwal" class="p-4 sm:p-6">
+    <h2 class="text-2xl font-bold text-center mb-6">Menu Utama</h2>
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label for="tanggal" class="block text-gray-700 mb-2 font-medium">Pilih Tanggal:</label>
+          <input type="date" id="tanggal" class="w-full border border-gray-300 rounded-lg p-2">
+        </div>
+        <div>
+          <label for="jam" class="block text-gray-700 mb-2 font-medium">Pilih Waktu:</label>
+          <select id="jam" class="w-full border border-gray-300 rounded-lg p-2"></select>
+        </div>
+      </div>
+      <div class="flex justify-center mb-6">
+        <button onclick="renderKelas()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+          Lihat Kelas
+        </button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="kelasContainer"></div>
+    </div>
+  </div>
+
+  <!-- Booking Kelas -->
+  <div id="booking" class="hidden p-4 sm:p-6">
+    <div class="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-center mb-4">Permohonan Booking Kelas</h2>
+      <form class="space-y-4">
+        <input type="text" placeholder="Nama Mahasiswa" class="w-full border border-gray-300 rounded-lg p-3">
+        <input type="text" placeholder="NIM" class="w-full border border-gray-300 rounded-lg p-3">
+        <select class="w-full border border-gray-300 rounded-lg p-3">
+          <option>Pilih Ruang</option>
+          <option>301</option><option>302</option><option>303</option><option>304</option>
+          <option>305</option><option>306</option><option>401</option><option>402</option>
+          <option>403</option><option>404</option><option>405</option><option>406</option>
+        </select>
+        <select id="bookingWaktu" class="w-full border border-gray-300 rounded-lg p-3"></select>
+        <button type="button" class="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition">
+          Ajukan Permohonan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin" class="hidden p-4 sm:p-6">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-center mb-4">Login Admin</h2>
+      <div id="loginBox">
+        <input type="text" id="username" placeholder="Username" class="w-full border border-gray-300 rounded-lg p-3 mb-4">
+        <input type="password" id="password" placeholder="Password" class="w-full border border-gray-300 rounded-lg p-3 mb-4">
+        <button onclick="loginAdmin()" class="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold hover:bg-blue-700 transition">Login</button>
+      </div>
+      <div id="adminPanel" class="hidden">
+        <h3 class="text-xl font-semibold text-center mb-4">Edit Status Kelas</h3>
+        <input type="date" id="adminTanggal" class="w-full border border-gray-300 rounded-lg p-3 mb-4">
+        <select id="adminWaktu" class="w-full border border-gray-300 rounded-lg p-3 mb-4"></select>
+        <select id="kelasSelect" class="w-full border border-gray-300 rounded-lg p-3 mb-4"></select>
+        <select id="statusSelect" class="w-full border border-gray-300 rounded-lg p-3 mb-4">
+          <option value="kosong">Kosong</option>
+          <option value="terpakai">Terpakai</option>
+        </select>
+        <button onclick="updateStatus()" class="w-full bg-green-600 text-white rounded-lg py-3 font-semibold hover:bg-green-700 transition">Ubah Status</button>
+        <button onclick="resetData()" class="w-full bg-red-600 text-white rounded-lg py-3 font-semibold hover:bg-red-700 transition mt-4">Reset Semua Data</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const kelasList = ["301","302","303","304","305","306","401","402","403","404","405","406"];
+    let kelasStatus = JSON.parse(localStorage.getItem("kelasStatus")) || {};
+
+    const waktuList = [
+      "07.10-08.50", "08.50-10.30", "09.40-11.20",
+      "10.30-12.10", "13.00-14.40", "14.40-16.20", "15.40-17.20"
+    ];
+
+    function updateWaktu() {
+      const jamSelect = document.getElementById('jam');
+      const bookingSelect = document.getElementById('bookingWaktu');
+      const adminSelect = document.getElementById('adminWaktu');
+      [jamSelect, bookingSelect, adminSelect].forEach(select => {
+        if (select) {
+          select.innerHTML = '';
+          waktuList.forEach(w => {
+            const opt = document.createElement('option');
+            opt.textContent = w;
+            select.appendChild(opt);
+          });
+        }
+      });
+    }
+
+    function renderKelas() {
+      kelasStatus = JSON.parse(localStorage.getItem("kelasStatus")) || {};
+      const tanggal = document.getElementById('tanggal').value || 'default';
+      const waktu = document.getElementById('jam').value || 'default';
+      if (!kelasStatus[tanggal]) kelasStatus[tanggal] = {};
+      if (!kelasStatus[tanggal][waktu]) kelasStatus[tanggal][waktu] = {};
+
+      const container = document.getElementById('kelasContainer');
+      container.innerHTML = '';
+      kelasList.forEach(kelas => {
+        const status = kelasStatus[tanggal][waktu][kelas] || 'kosong';
+        const div = document.createElement('div');
+        div.className = `${status === 'kosong' ? 'room-available' : 'room-occupied'} text-white p-4 sm:p-6 rounded-xl text-center cursor-pointer`;
+        div.innerHTML = `
+          <div class="text-lg sm:text-2xl font-bold mb-1">${kelas}</div>
+          <div class="text-xs sm:text-sm">${status === 'kosong' ? 'Tersedia' : 'Terpakai'}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll('#jadwal, #booking, #admin').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+    }
+
+    function loginAdmin() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === 'admin' && pass === 'admin') {
+        document.getElementById('loginBox').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        const kelasSelect = document.getElementById('kelasSelect');
+        kelasSelect.innerHTML = kelasList.map(k => `<option value='${k}'>${k}</option>`).join('');
+      } else {
+        alert('Login gagal! Username atau password salah.');
+      }
+    }
+
+    function updateStatus() {
+      const tanggal = document.getElementById('adminTanggal').value || 'default';
+      const waktu = document.getElementById('adminWaktu').value || 'default';
+      const kelas = document.getElementById('kelasSelect').value;
+      const status = document.getElementById('statusSelect').value;
+
+      if (!kelasStatus[tanggal]) kelasStatus[tanggal] = {};
+      if (!kelasStatus[tanggal][waktu]) kelasStatus[tanggal][waktu] = {};
+      kelasStatus[tanggal][waktu][kelas] = status;
+
+      localStorage.setItem("kelasStatus", JSON.stringify(kelasStatus));
+
+      const mainTanggal = document.getElementById('tanggal').value;
+      const mainWaktu = document.getElementById('jam').value;
+      if (mainTanggal === tanggal && mainWaktu === waktu) {
+        renderKelas();
+      }
+
+      alert(`Status ruang ${kelas} pada ${tanggal} jam ${waktu} diubah menjadi ${status}.`);
+    }
+
+    function resetData() {
+      if (confirm("Yakin ingin menghapus semua data jadwal?")) {
+        localStorage.removeItem("kelasStatus");
+        kelasStatus = {};
+        renderKelas();
+        alert("Semua data jadwal berhasil dihapus.");
+      }
+    }
+
+    updateWaktu();
+    renderKelas();
+  </script>
+</body>
+</html>
